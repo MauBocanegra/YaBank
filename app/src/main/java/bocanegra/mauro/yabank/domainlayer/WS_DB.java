@@ -11,54 +11,73 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.ServerError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import bocanegra.mauro.yabank.R;
+import bocanegra.mauro.yabank.domainlayer.db.AppDatabase;
+import bocanegra.mauro.yabank.domainlayer.db.CompanyDAO;
+import bocanegra.mauro.yabank.domainlayer.db.CompanyPOJO_DB;
 import bocanegra.mauro.yabank.domainlayer.pojos.AnswPOJO;
 import bocanegra.mauro.yabank.domainlayer.pojos.LoginAnswPOJO;
 import bocanegra.mauro.yabank.domainlayer.pojos.LoginPOJO;
+import bocanegra.mauro.yabank.presentationlayer.fragments.RecargasFragment;
 
-public class WS {
+public class WS_DB {
 
     public static final String TAG = "WSDebug";
     public static final String urlLogin = "https://agentemovil.pagatodo.com/AgenteMovil.svc/agMov/login";
 
-    private static WS instance;
+    static AppDatabase database;
+    static CompanyDAO companyDAO;
 
-    public synchronized  static WS getInstance(){
+    private static WS_DB instance;
+
+    public synchronized  static WS_DB getInstance(){
         if(instance != null){
-            instance = new WS();
+            instance = new WS_DB();
         }
 
         return instance;
     }
 
-    // ------------------------------------------- //
-    // -------------- WEB SERVICES --------------- //
-    // ------------------------------------------- //
+    // ---------------------------------------------------- //
+    // -------------- WEB SERVICES METHODS  --------------- //
+    // ---------------------------------------------------- //
 
     public static void signIn(Context c, LoginPOJO loginPOJO, OnWSRequested onWSRequested){
         performRequest(c, urlLogin, loginPOJO.toJSONObject(), onWSRequested);
     }
 
-    // ------------------------------------------- //
-    // -------------- IMPLEMENTATION --------------- //
-    // ------------------------------------------- //
+    // ------------------------------------------ //
+    // -------------- DB METHODS  --------------- //
+    // ------------------------------------------ //
+
+    public static void instanciateDB(Activity activity, OnDBAllRequested onDBAllRequested){
+        database = AppDatabase.prePopulateDB(activity);
+        companyDAO = database.getCompanyDAO();
+
+        DBTask dbTask = new DBTask(activity, onDBAllRequested);
+        dbTask.execute();
+    }
+
+    // ---------------------------------------------------------- //
+    // -------------- WEB SERVICES IMPLEMENTATION --------------- //
+    // ---------------------------------------------------------- //
 
     private static JSONObject performRequest(Context c, String urlString, JSONObject json, final OnWSRequested onWSRequested){
 
@@ -119,10 +138,30 @@ public class WS {
         return null;
     }
 
-    private static class Task extends AsyncTask<Void,Void,JSONObject>{
+    // ------------------------------------------------ //
+    // -------------- DB IMPLEMENTATION --------------- //
+    // ------------------------------------------------ //
+
+    private static class DBTask extends AsyncTask<Void, Void, List<CompanyPOJO_DB>> {
+
+        private WeakReference<Activity> weakActivity;
+        private OnDBAllRequested onDBAllRequested;
+
+        public DBTask(Activity activity, OnDBAllRequested onDBListener){
+            weakActivity = new WeakReference<>(activity);
+            this.onDBAllRequested = onDBListener;
+        }
+
         @Override
-        protected JSONObject doInBackground(Void... voids) {
-            return null;
+        protected List<CompanyPOJO_DB> doInBackground(Void... voids) {
+            return companyDAO.getCompanies();
+        }
+
+        @Override
+        protected void onPostExecute(List<CompanyPOJO_DB> companies) {
+            super.onPostExecute(companies);
+            ArrayList<CompanyPOJO_DB> companiesArr = new ArrayList<>(companies);
+            onDBAllRequested.dbAnswered(companiesArr);
         }
     }
 
@@ -134,9 +173,13 @@ public class WS {
         public void wsAnswered(AnswPOJO answPOJO);
     }
 
-    // ------------------------------------------- //
+    public interface OnDBAllRequested{
+        public void dbAnswered(ArrayList<CompanyPOJO_DB> arrayList);
+    }
+
+    // --------------------------------------- //
     // -------------- MESSAGES --------------- //
-    // ------------------------------------------- //
+    // --------------------------------------- //
 
     public static void showError(String msg, View view) {
 
@@ -146,6 +189,10 @@ public class WS {
         snack.setAction("Action", null).show();
         snack.show();
     }
+
+    // --------------------------------------- //
+    // -------------- KEYBOARD --------------- //
+    // --------------------------------------- //
 
     public static void hideKeyboard(Activity activity) {
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);

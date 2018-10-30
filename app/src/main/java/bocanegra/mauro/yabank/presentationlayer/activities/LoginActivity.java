@@ -14,12 +14,12 @@ import android.widget.Button;
 import org.json.JSONObject;
 
 import bocanegra.mauro.yabank.R;
-import bocanegra.mauro.yabank.domainlayer.WS;
+import bocanegra.mauro.yabank.domainlayer.WS_DB;
 import bocanegra.mauro.yabank.domainlayer.pojos.AnswPOJO;
 import bocanegra.mauro.yabank.domainlayer.pojos.LoginAnswPOJO;
 import bocanegra.mauro.yabank.domainlayer.pojos.LoginPOJO;
 
-public class LoginActivity extends AppCompatActivity implements WS.OnWSRequested {
+public class LoginActivity extends AppCompatActivity implements WS_DB.OnWSRequested {
 
     TextInputLayout textInputLayoutUsuario;
     TextInputEditText editTextUsuario;
@@ -62,7 +62,7 @@ public class LoginActivity extends AppCompatActivity implements WS.OnWSRequested
             @Override
             public void onClick(View v) {
                 if(checkForErrors()==0){
-                    WS.hideKeyboard(LoginActivity.this);
+                    WS_DB.hideKeyboard(LoginActivity.this);
                     performLoginRequest();
                 }
             }
@@ -94,11 +94,11 @@ public class LoginActivity extends AppCompatActivity implements WS.OnWSRequested
         loginPojo.setUser(editTextUsuario.getEditableText().toString());
         loginPojo.setPass(editTextContra.getEditableText().toString());
 
-        WS.signIn(LoginActivity.this, loginPojo, LoginActivity.this);
+        WS_DB.signIn(LoginActivity.this, loginPojo, LoginActivity.this);
     }
 
     // --------------------------------------------- //
-    // -------------- WS IMPLEMENTATION --------------- //
+    // -------------- WS_DB IMPLEMENTATION --------------- //
     // --------------------------------------------- //
 
     @Override
@@ -118,7 +118,7 @@ public class LoginActivity extends AppCompatActivity implements WS.OnWSRequested
         }else{
             try{
                 JSONObject jsonError = new JSONObject(loginAnswPOJO.getError());
-                WS.showError(jsonError.getString("message"), container);
+                WS_DB.showError(jsonError.getString("message"), container);
             }catch(Exception e){e.printStackTrace();}
         }
     }

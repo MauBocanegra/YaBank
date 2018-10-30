@@ -34,7 +34,13 @@
         <activity
             android:name=".presentationlayer.activities.MenuActivity"
             android:label="@string/title_activity_menu"
-            android:theme="@style/AppThemeNoBar" />
+            android:theme="@style/AppThemeNoBar" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable"/>
+        </activity>
         <activity
             android:name=".presentationlayer.activities.RecargaActivity"
             android:theme="@style/AppThemeNoBar">

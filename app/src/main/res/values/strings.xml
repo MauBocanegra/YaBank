@@ -10,6 +10,7 @@
 
     <string name="sharedPreferences">SharedPreferencesYa</string>
     <string name="keyLogin">loggedIn</string>
+    <string name="searchable_compania">Compañía</string>
 
 
     <!--  Content Descriptors  -->
@@ -21,7 +22,7 @@
     <string name="tab_text_1">Recargas</string>
     <string name="tab_text_2">Vacio1</string>
     <string name="tab_text_3">Vacio2</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_search">Biuscar</string>
     <string name="section_format">Hello World from section: %1$d</string>
 
     <!-- TODO: Remove or change this placeholder text -->
