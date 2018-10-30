@@ -57,14 +57,8 @@ public class MenuActivity extends AppCompatActivity {
         setContentView(R.layout.activity_menu);
 
         instanciate();
-        //instanciateDatabase();
 
-        /*
-        DBTask dbTask = new DBTask(MenuActivity.this);
-        dbTask.execute();
-        */
-
-        // Get the intent, verify the action and get the query
+        // Intent de busqueda
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
@@ -87,15 +81,6 @@ public class MenuActivity extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
-    }
-
-    private void instanciateDatabase() {
-        database = AppDatabase.prePopulateDB(MenuActivity.this);
-        companyDAO = database.getCompanyDAO();
-
-        DBTask dbTask = new DBTask(MenuActivity.this);
-        dbTask.execute();
-
     }
 
     // --------------------------------------------- //
@@ -166,26 +151,6 @@ public class MenuActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             return inflater.inflate(R.layout.fragment_menu, container, false);
-        }
-    }
-
-    private class DBTask extends AsyncTask<Void, Void, List<CompanyPOJO_DB>> {
-
-        private WeakReference<Activity> weakActivity;
-
-        public DBTask(Activity activity){
-            weakActivity = new WeakReference<>(activity);
-        }
-
-        @Override
-        protected List<CompanyPOJO_DB> doInBackground(Void... voids) {
-            return companyDAO.getCompanies();
-        }
-
-        @Override
-        protected void onPostExecute(List<CompanyPOJO_DB> companies) {
-            super.onPostExecute(companies);
-            Log.d(TAG, "num_of_companies = "+companies.size());
         }
     }
 
